@@ -16,11 +16,19 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    // 256 bit encryption
     private static final String SECRET_KEY = "2B4B6250645367566B5970337336763979244226452948404D6351665468576D";
 
     public String extractUserName(String token){
         return extractClaim(token, Claims::getSubject);
     }
+
+    //claimsTFunction : function that operates on the Claims object and returns a value of type T
+    public  <T>T extractClaim(String token, Function<Claims, T>claimsTFunction ){
+        final Claims claims = extractAllClaims(token);
+        return claimsTFunction.apply(claims);
+    }
+
     private Claims extractAllClaims(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
@@ -53,10 +61,7 @@ public class JwtService {
     public String generateToken(UserDetails userDetails){
         return generateToken(new HashMap<>(), userDetails);
     }
-    public  <T>T extractClaim(String token, Function<Claims, T>claimsTFunction ){
-        final Claims claims = extractAllClaims(token);
-        return claimsTFunction.apply(claims);
-    }
+
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);

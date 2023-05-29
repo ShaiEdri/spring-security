@@ -19,12 +19,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
+@RequiredArgsConstructor //hides the impl for DI, private-final fields will be autowired but we wont se it
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    @Autowired
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-    private final TokenRepository tokenRepository;
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
