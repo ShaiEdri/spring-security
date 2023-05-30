@@ -7,6 +7,6 @@ spring:
     hibernate:
       ddl-auto: create-drop
       # format_sql: true (commented out for now)
-    show-sql: false
+    show-sql: true
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
