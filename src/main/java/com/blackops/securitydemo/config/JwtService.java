@@ -5,19 +5,19 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
     // 256 bit encryption
-    private static final String SECRET_KEY = "2B4B6250645367566B5970337336763979244226452948404D6351665468576D";
+    private static final String ENCRYPT_KEY = "2B4B6250645367566B5970337336763979244226452948404D6351665468576D";
 
     public String extractUserName(String token){
         return extractClaim(token, Claims::getSubject);
@@ -45,6 +45,10 @@ public class JwtService {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+    public List<String> extractRoleClaims(String token) {
+        return (List<String>) extractAllClaims(token).get("roles");
+    }
+
     public boolean isValidToken(String token, UserDetails userDetails){
         final String userName = extractUserName(token);
         return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
@@ -58,12 +62,29 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
+//    public String generateToken(UserDetails userDetails){
+//        return generateToken(new HashMap<>(), userDetails);
+//    }
+
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        // Prepare a list to hold the authorities.
+        List<String> authoritiesList = new ArrayList<>();
+
+        // Loop over all authorities of the user and add them to the list.
+        for (GrantedAuthority authority : userDetails.getAuthorities()) {
+            authoritiesList.add(authority.getAuthority());
+        }
+
+        // Add the list of authorities to the claims.
+        claims.put("roles", authoritiesList);
+        return generateToken(claims, userDetails);
     }
 
+
+
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(ENCRYPT_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

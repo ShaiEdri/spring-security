@@ -6,6 +6,7 @@ import com.blackops.securitydemo.user.User;
 import com.blackops.securitydemo.user.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,20 +23,22 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    //Return
     public AuthenticationResponse register(RegisterRequest registerRequest) {
+
         User user = User.builder()
                 .firstname(registerRequest.getFirstName())
                 .lastname(registerRequest.getLastName())
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .role(Role.USER)
+                .role(registerRequest.getRole())
                 .build();
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest registerRequest) {
+    public AuthenticationResponse authenticate(AuthenticationRequest registerRequest) throws AuthenticationException {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         registerRequest.getEmail(),

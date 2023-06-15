@@ -1,5 +1,7 @@
 package com.blackops.securitydemo.config;
 
+import com.blackops.securitydemo.user.Role;
+import com.blackops.securitydemo.user.User;
 import com.blackops.securitydemo.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -8,12 +10,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -34,6 +39,19 @@ public class AppConfig {
         return username -> userRepository.findByEmail(username)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found"));
     }
+
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        return username -> {
+//            User user = userRepository.findByEmail(username)
+//                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+//            Role authorities = user.getRole(); // assuming getRole() returns a list of Role
+//            return new User(user.getId(),user.getFirstname(),
+//                    user.getLastname(),
+//                    user.getEmail(), user.getPassword(), authorities);
+//        };
+//    }
+
 
     //this is the data access object that will fetch theuser details and more
     //has many impls. well use DaoAuthenticationProvider
